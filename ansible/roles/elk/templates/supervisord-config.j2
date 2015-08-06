@@ -1,0 +1,56 @@
+;
+; For more information on the config file, please see:
+; http://supervisord.org/configuration.html
+;
+; Notes:
+;  - Shell expansion ("~" or "$HOME") is not supported.  Environment
+;    variables can be expanded using this syntax: "%(ENV_HOME)s".
+;  - Comments must have a leading space: "a=b ;comment" not "a=b;comment".
+
+[unix_http_server]
+file=/var/tmp/supervisor.sock   ; (the path to the socket file)
+
+[supervisord]
+logfile={{ supervisor_logdir }}/supervisord.log ; (main log file;default $CWD/supervisord.log)
+logfile_maxbytes=50MB        ; (max main logfile bytes b4 rotation;default 50MB)
+logfile_backups=10           ; (num of main logfile rotation backups;default 10)
+loglevel=info                ; (log level;default info; others: debug,warn,trace)
+pidfile={{ supervisor_runtimedir }}/supervisord.pid ; (supervisord pidfile;default supervisord.pid)
+nodaemon=false               ; (start in foreground if true;default false)
+minfds=1024                  ; (min. avail startup file descriptors;default 1024)
+minprocs=200                 ; (min. avail process descriptors;default 200)
+
+[supervisorctl]
+serverurl=unix:///var/tmp/supervisor.sock ; use a unix:// URL  for a unix socket
+
+[rpcinterface:supervisor]
+supervisor.rpcinterface_factory = supervisor.rpcinterface:make_main_rpcinterface
+
+[program:elasticsearch]
+command=/opt/elasticsearch-{{ elasticsearch_version }}/bin/elasticsearch
+directory=/opt/elasticsearch-{{ elasticsearch_version }}/
+user={{ elasticsearch_user }}
+environment=JAVA_OPTS="{{ elasticsearch_java_opts }}"
+autostart=true
+autorestart=true
+redirect_stderr=true
+stdout_logfile={{ elasticsearch_logdir }}/out.log
+stderr_logfile={{ elasticsearch_logdir }}/err.log
+
+[program:nginx]
+command = {{ nginx_install_dir }}/sbin/nginx
+user={{ nginx_user }}
+autostart=true
+autorestart=unexpected
+exitcodes=0
+stdout_logfile={{ nginx_logdir }}/out.log
+stderr_logfile={{ nginx_logdir }}/err.log
+
+[program:kibana]
+command=/opt/kibana-{{ kibana_version }}-linux-x64/bin/kibana
+autostart=true
+autorestart=true
+user={{ nginx_user }}
+stdout_logfile={{ kibana_logdir }}/out.log
+stderr_logfile={{ kibana_logdir}}/err.log
+

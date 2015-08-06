@@ -1,0 +1,184 @@
+---
+- name: Install the 'Development tools' package group
+  yum: name="@Development tools" state=installed
+
+- name: Ensure prerequisite packages are installed 
+  yum: name={{ item }}  state=installed
+  with_items:
+    - libselinux-python
+    - zlib-devel
+    - openssl-devel
+    - sqlite-devel
+    - bzip2-devel
+    - readline-devel
+    - unixODBC-devel
+    - pcre-devel
+
+- name: Create temporary directory for unpacking packages
+  file: path={{ pkg_temp }} state=directory mode=0755
+
+- name: Copy over installation packages
+  copy: src=reporting_pkg.tar.gz dest={{ pkg_temp }}/reporting_pkg.tar.gz force=no
+
+- name: Extract Installation packages 
+  unarchive: src={{ pkg_temp }}/reporting_pkg.tar.gz
+            dest=/opt
+            copy=no
+            creates={{ pkg_temp }}/reporting_pkg
+
+- name: Create Reporting Dir
+  file: path={{ ensemble_dir }} state=directory mode=0755
+
+- name: Extract python
+  unarchive: src={{ packages_dir }}/Python-{{ python_version }}.tgz
+            dest={{ pkg_temp }}
+            copy=no
+            creates={{ pkg_temp }}/Python-{{ python_version }}
+
+- name: Build python
+  shell: cd {{ pkg_temp }}/Python-{{ python_version }}; {{ item }} creates={{ ensemble_dir }}/bin/python
+  with_items:
+    - ./configure --prefix=/opt/ensemble
+    - make
+    - make install
+
+- name: Extract setuptools
+  unarchive: src={{ packages_dir }}/setuptools-18.0.1.tar.gz
+            dest={{ pkg_temp }}
+            copy=no
+            creates={{ pkg_temp }}/setuptools-18.0.1
+
+- name: Install setuptools
+  shell: '{{ ensemble_dir }}/bin/python setup.py install'
+  args:
+    chdir: "{{ pkg_temp }}/setuptools-18.0.1"
+    creates: "{{ pkg_temp }}/setuptools-18.0.1/build"
+
+- name: Extract urllib3
+  unarchive: src={{ packages_dir }}/urllib3-1.10.4.tar.gz
+            dest={{ pkg_temp }}
+            copy=no
+            creates={{ pkg_temp }}/urllib3-1.10.4
+
+- name: Install urllib3
+  shell: '{{ ensemble_dir }}/bin/python setup.py install'
+  args:
+    chdir: "{{ pkg_temp }}/urllib3-1.10.4"
+    creates: "{{ pkg_temp }}/urllib3-1.10.4/build"
+
+- name: Extract unittest2 
+  unarchive: src={{ packages_dir }}/unittest2-1.1.0.tar.gz
+            dest={{ pkg_temp }}
+            copy=no
+            creates={{ pkg_temp }}/unittest2-1.1.0
+
+- name: Install urllib3
+  shell: '{{ ensemble_dir }}/bin/python setup.py install'
+  args:
+    chdir: "{{ pkg_temp }}/unittest2-1.1.0"
+    creates: "{{ pkg_temp }}/unittest2-1.1.0/build"
+
+- name: Extract pip
+  unarchive: src={{ packages_dir }}/pip-7.1.0.tar.gz
+            dest={{ pkg_temp }}
+            copy=no
+            creates={{ pkg_temp }}/pip-7.1.0
+
+- name: Install pip
+  shell: '{{ ensemble_dir }}/bin/python setup.py install'
+  args:
+    chdir: "{{ pkg_temp }}/pip-7.1.0"
+    creates: "{{ pkg_temp }}/pip-7.1.0/build"
+
+- name: Extract PyYAML 
+  unarchive: src={{ packages_dir }}/PyYAML-3.11.tar.gz
+            dest={{ pkg_temp }}
+            copy=no
+            creates={{ pkg_temp }}/PyYAML-3.11
+
+- name: Install PyYAML
+  shell: '{{ ensemble_dir }}/bin/python setup.py install'
+  args:
+    chdir: "{{ pkg_temp }}/PyYAML-3.11"
+    creates: "{{ pkg_temp }}/PyYAML-3.11/build"
+
+- name: Extract meld3
+  unarchive: src={{ packages_dir }}/meld3-0.6.5.tar.gz
+            dest={{ pkg_temp }}
+            copy=no
+            creates={{ pkg_temp }}/meld3-0.6.5
+
+- name: Install meld3
+  shell: '{{ ensemble_dir }}/bin/python setup.py install'
+  args:
+    chdir: "{{ pkg_temp }}/meld3-0.6.5"
+    creates: "{{ pkg_temp }}/meld3-0.6.5/build"
+
+- name: Extract elementtree
+  unarchive: src={{ packages_dir }}/elementtree-1.2.6-20050316.tar.gz
+            dest={{ pkg_temp }}
+            copy=no
+            creates={{ pkg_temp }}/elementtree-1.2.6-20050316
+
+- name: Install elementtree
+  shell: '{{ ensemble_dir }}/bin/python setup.py install'
+  args:
+    chdir: "{{ pkg_temp }}/elementtree-1.2.6-20050316"
+    creates: "{{ pkg_temp }}/elementtree-1.2.6-20050316/build"
+
+- name: Extract Django
+  unarchive: src={{ packages_dir }}/Django-1.8.2.tar.gz
+            dest={{ pkg_temp }}
+            copy=no
+            creates={{ pkg_temp }}/Django-1.8.2
+
+- name: Install Django
+  shell: '{{ ensemble_dir }}/bin/python setup.py install'
+  args:
+    chdir: "{{ pkg_temp }}/Django-1.8.2"
+    creates: "{{ pkg_temp }}/Django-1.8.2/build"
+
+- name: Extract pyodbc
+  unarchive: src={{ packages_dir }}/pyodbc-3.0.7.zip
+            dest={{ pkg_temp }}
+            copy=no
+            creates={{ pkg_temp }}/pyodbc-3.0.7
+
+- name: Install pyodbc
+  shell: '{{ ensemble_dir }}/bin/python setup.py install'
+  args:
+    chdir: "{{ pkg_temp }}/pyodbc-3.0.7"
+    creates: "{{ pkg_temp }}/pyodbc-3.0.7/build"
+
+- name: Extract SQLAlchemy
+  unarchive: src={{ packages_dir }}/SQLAlchemy-1.0.6.tar.gz
+            dest={{ pkg_temp }}
+            copy=no
+            creates={{ pkg_temp }}/SQLAlchemy-1.0.6
+
+- name: Install SQLAlchemy
+  shell: '{{ ensemble_dir }}/bin/python setup.py install'
+  args:
+    chdir: "{{ pkg_temp }}/SQLAlchemy-1.0.6"
+    creates: "{{ pkg_temp }}/SQLAlchemy-1.0.6/build"
+
+- name: Extract Supervisor
+  unarchive: src={{ packages_dir }}/supervisor-3.1.3.tar.gz
+            dest={{ pkg_temp }}
+            copy=no
+            creates={{ pkg_temp }}/supervisor-3.1.3
+
+- name: Install Supervisor 
+  shell: '{{ ensemble_dir }}/bin/python setup.py install'
+  args:
+    chdir: "{{ pkg_temp }}/supervisor-3.1.3"
+    creates: "{{ pkg_temp }}/supervisor-3.1.3/build"
+
+- name: Extract Server JRE
+  unarchive: src={{ packages_dir }}/{{ java_pkg }}
+            dest=/opt
+            copy=no
+            creates={{ java_dir }}
+
+- name: Create alternatives link to java
+  alternatives: name=java link=/usr/bin/java path={{ java_dir }}/bin/java

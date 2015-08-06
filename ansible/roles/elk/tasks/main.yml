@@ -1,0 +1,143 @@
+---
+- name: Extract Elasticsearch
+  unarchive: src={{ packages_dir }}/elasticsearch-{{ elasticsearch_version }}.tar.gz
+            dest=/opt
+            copy=no
+            creates=/opt/elasticsearch-{{ elasticsearch_version }}
+
+- name: Extract Kibana
+  unarchive: src={{ packages_dir }}/kibana-{{ kibana_version }}-linux-x64.tar.gz
+            dest=/opt
+            copy=no
+            creates=/opt/kibana-{{ kibana_version }}-linux-x64
+
+- name: Extract Logstash
+  unarchive: src={{ packages_dir }}/logstash-{{ logstash_version }}.tar.gz
+            dest=/opt
+            copy=no
+            creates=/opt/logstash-{{ logstash_version }}
+
+- name: Extract Nginx 
+  unarchive: src={{ packages_dir }}/nginx-{{ nginx_version }}.tar.gz
+            dest={{ pkg_temp }}
+            copy=no
+            creates={{ pkg_temp }}/nginx-{{ nginx_version }}
+
+- name: Build Nginx 
+  shell: cd {{ pkg_temp }}/nginx-{{ nginx_version }}; {{ item }} creates={{ nginx_install_dir }}/sbin/nginx
+  with_items:
+  - "./configure --prefix={{ nginx_install_dir }} --error-log-path={{ nginx_logdir }}/error.log --http-log-path={{ nginx_logdir }}/access.log --http-client-body-temp-path={{ nginx_tmp }}/client/ --http-proxy-temp-path={{ nginx_tmp }}/proxy/ --http-fastcgi-temp-path={{ nginx_tmp }}/fcgi/ --http-uwsgi-temp-path={{ nginx_tmp }}/uwsgi/ --http-scgi-temp-path={{ nginx_tmp }}/scgi/"
+  - "make"
+  - "make install"
+
+# Create users
+- name: Create elasticsearch group
+  group: name={{ elasticsearch_group }} state=present system=yes
+
+- name: Create elasticsearch user
+  user: name={{ elasticsearch_user }}
+        group={{ elasticsearch_group }} 
+        createhome=no
+        system=yes
+
+- name: Create nginx group
+  group: name={{ nginx_group }} state=present system=yes
+
+- name: Create nginx user
+  user: name={{ nginx_user }}
+        group={{ nginx_group }} 
+        createhome=no
+        system=yes
+
+# Supervisor setup
+- name: configure supervisord
+  template: src=supervisord-config.j2 dest={{ supervisor_config }} mode=0600
+
+- name: prepare necessary supervisord directories
+  file: path={{item}} state=directory recurse=yes
+  with_items:
+  - "{{supervisor_logdir}}"
+  - "{{supervisor_runtimedir}}"
+  - "{{kibana_logdir}}"
+  - "{{elasticsearch_logdir}}"
+  - "{{elasticsearch_datadir}}"
+  - "{{elasticsearch_tmp}}"
+  - "{{nginx_logdir}}"
+  - "{{nginx_tmp}}"
+
+- name: Change ownership of nginx logdir
+  file: path={{ nginx_logdir }} owner={{ nginx_user }} group={{ nginx_group }}
+
+- name: Change ownership of nginx tmp 
+  file: path={{ nginx_tmp }} owner={{ nginx_user }} group={{ nginx_group }}
+
+- name: Modify nginx defaults file
+  replace:
+    dest=/opt/nginx/conf/nginx.conf.default
+    regexp='listen(\s+)80;'
+    replace='listen 8081;'
+
+- name: Change ownership of elasticsearch logdir
+  file: path={{ elasticsearch_logdir }} owner={{ elasticsearch_user }} group={{ elasticsearch_group }}
+
+- name: Change ownership of elasticsearch datadir
+  file: path={{ elasticsearch_datadir }} owner={{ elasticsearch_user }} group={{ elasticsearch_group }}
+
+- name: Change ownership of elasticsearch tmp dir
+  file: path={{ elasticsearch_tmp }} owner={{ elasticsearch_user }} group={{ elasticsearch_group }}
+
+- name: copy supervisor init script
+  template: src=supervisor-init.j2 dest=/etc/init.d/supervisord mode=0751
+
+- name: make sure supervisord is started up
+  action: service name=supervisord state=started
+
+# Configure nginx
+- name: configure Nginx
+  template: src=nginx-config.j2 dest={{ nginx_install_dir }}/conf/nginx.conf
+
+# Configure elasticsearch 
+- name: configure elasticsearch 
+  template: src=elasticsearch-config.j2 dest=/opt/elasticsearch-{{ elasticsearch_version }}/config/elasticsearch.yml
+
+# Configure open file limits
+- name: Configuring open file limits
+  shell: "echo Configuring open file limits"
+            
+- lineinfile: dest=/etc/security/limits.conf regexp='^{{ elasticsearch_user }}     -    nofile    {{ elasticsearch_max_open_files }}' insertafter=EOF line='{{ elasticsearch_user }}     -    nofile    {{ elasticsearch_max_open_files }}'
+  when: elasticsearch_max_open_files is defined
+  notify: Restart Elasticsearch
+              
+- lineinfile: dest=/etc/security/limits.conf regexp='^{{ elasticsearch_user }}     -    memlock   {{ elasticsearch_max_locked_memory }}' insertafter=EOF line='{{ elasticsearch_user }}     -    memlock   {{ elasticsearch_max_locked_memory }}'
+  when: elasticsearch_max_locked_memory is defined
+  notify: Restart Elasticsearch
+                
+- lineinfile: dest=/etc/pam.d/su regexp='^session    required   pam_limits.so' insertafter=EOF line='session    required   pam_limits.so'
+  notify: Restart Elasticsearch
+                      
+- lineinfile: dest=/etc/pam.d/sudo regexp='^session    required   pam_limits.so' insertafter=EOF line='session    required   pam_limits.so'
+  notify: Restart Elasticsearch
+
+- name: Ensure supervisord is running
+  service:
+    name: supervisord 
+    state: running
+    enabled: yes
+
+- name: Ensure Elasticsearch is running
+  supervisorctl:
+    supervisorctl_path={{ ensemble_dir }}/bin/supervisorctl
+    name=elasticsearch
+    state=started
+
+- name: Ensure Kibana is running
+  supervisorctl:
+    supervisorctl_path={{ ensemble_dir }}/bin/supervisorctl
+    name=kibana
+    state=started
+
+- name: Ensure Nginx is running
+  supervisorctl:
+    supervisorctl_path={{ ensemble_dir }}/bin/supervisorctl
+    name=nginx
+    state=started

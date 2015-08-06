@@ -1,0 +1,20 @@
+---
+# Elasticsearch Ansible Handlers
+
+- name: Restart Elasticsearch
+  supervisorctl:
+    supervisorctl_path={{ ensemble_dir }}/bin/supervisorctl
+    name=elasticsearch
+    state=restarted
+
+- name: Restart Kibana
+  supervisorctl:
+    supervisorctl_path={{ ensemble_dir }}/bin/supervisorctl
+    name=kibana
+    state=restarted
+
+- name: Restart Nginx
+  supervisorctl:
+    supervisorctl_path={{ ensemble_dir }}/bin/supervisorctl
+    name=nginx
+    state=restarted

@@ -1,0 +1,33 @@
+---
+- hosts: all
+  vars:
+    packages_dir: /opt/reporting_pkg
+    python_version: 2.7.10
+    pkg_temp: /var/tmp/pkg_temp
+    ensemble_dir: /opt/ensemble
+    java_pkg: server-jre-8u51-linux-x64.tar.gz
+    java_dir: /opt/jdk1.8.0_51
+    elasticsearch_user: elasticsearch
+    elasticsearch_version: 1.7.1
+    elasticsearch_clustername: jaytest
+    elasticsearch_group: elasticsearch
+    elasticsearch_java_opts: "-Xmx64m -Xms32m"
+    elasticsearch_logdir: /var/log/elasticsearch
+    elasticsearch_datadir: /opt/elasticsearch_data
+    elasticsearch_tmp: /var/tmp/elasticsearch
+    kibana_version: 4.1.1
+    kibana_logdir: /var/log/kibana
+    logstash_version: 1.5.3
+    nginx_logdir: /var/log/nginx
+    nginx_tmp: /var/tmp/nginx
+    nginx_user: nginx
+    nginx_group: nginx
+    nginx_version: 1.8.0
+    nginx_install_dir: /opt/nginx
+    supervisor_config: /etc/supervisord.conf
+    supervisor_logdir: /var/log/supervisord
+    supervisor_runtimedir: /var/run/supervisord
+  sudo: true
+  roles:
+    - base
+    - elk 
