@@ -1,0 +1,20 @@
+---
+# Main
+packages_dir: /opt/reporting_pkg
+pkg_temp: /var/tmp/pkg_temp
+
+# Ensemble ETL
+ensemble_dir: /opt/ensemble
+
+# Java
+java_pkg: server-jre-8u51-linux-x64.tar.gz
+java_dir: /opt/jdk1.8.0_51
+
+# supervisor settings
+supervisor_config: /etc/supervisord.conf
+supervisor_logdir: /var/log/supervisord
+supervisor_runtimedir: /var/run/supervisord
+
+# Misc
+python_version: 2.7.10
+

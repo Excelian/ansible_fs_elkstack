@@ -29,7 +29,7 @@
 # Cluster name identifies your cluster for auto-discovery. If you're running
 # multiple clusters on the same network, make sure you're using unique names.
 #
-cluster.name: {{ elasticsearch_clustername }}
+cluster.name: "{{ elasticsearch_clustername }}"
 
 
 #################################### Node #####################################
@@ -86,7 +86,7 @@ node.name: "{{ ansible_hostname }}"
 
 # By default, multiple nodes are allowed to start from the same installation location
 # to disable it, set the following:
-#node.max_local_storage_nodes: 1
+node.max_local_storage_nodes: {{ elasticsearch_node_max_local_storage_nodes }} 
 
 
 #################################### Index ####################################
@@ -181,7 +181,7 @@ path.logs: {{ elasticsearch_logdir }}
 #
 # Set this property to true to lock the memory:
 #
-#bootstrap.mlockall: true
+bootstrap.mlockall: true
 
 # Make sure that the ES_MIN_MEM and ES_MAX_MEM environment variables are set
 # to the same value, and that the machine has enough memory to allocate
@@ -244,7 +244,7 @@ path.logs: {{ elasticsearch_logdir }}
 
 # The default gateway type is the "local" gateway (recommended):
 #
-#gateway.type: local
+gateway.type: {{ elasticsearch_gateway_type }}
 
 # Settings below control how and when to start the initial recovery process on
 # a full cluster restart (to reuse as much local data as possible when using shared
@@ -252,18 +252,20 @@ path.logs: {{ elasticsearch_logdir }}
 
 # Allow recovery process after N nodes in a cluster are up:
 #
-#gateway.recover_after_nodes: 1
+gateway.recover_after_nodes: {{ elasticsearch_gateway_recover_after_nodes }} 
 
 # Set the timeout to initiate the recovery process, once the N nodes
 # from previous setting are up (accepts time value):
 #
-#gateway.recover_after_time: 5m
+gateway.recover_after_time: {{ elasticsearch_gateway_recover_after_time }} 
+
 
 # Set how many nodes are expected in this cluster. Once these N nodes
 # are up (and recover_after_nodes is met), begin recovery process immediately
 # (without waiting for recover_after_time to expire):
 #
-#gateway.expected_nodes: 2
+gateway.expected_nodes: {{ elasticsearch_gateway_expected_nodes }} 
+
 
 
 ############################# Recovery Throttling #############################
@@ -301,13 +303,14 @@ path.logs: {{ elasticsearch_logdir }}
 # operational within the cluster. This should be set to a quorum/majority of 
 # the master-eligible nodes in the cluster.
 #
-#discovery.zen.minimum_master_nodes: 1
+discovery.zen.minimum_master_nodes: {{ elasticsearch_discovery_zen_minimum_master_nodes }} 
 
 # Set the time to wait for ping responses from other nodes when discovering.
 # Set this option to a higher value on a slow or congested network
 # to minimize discovery failures:
 #
-#discovery.zen.ping.timeout: 3s
+discovery.zen.ping.timeout: {{ elasticsearch_discovery_zen_ping_timeout }} 
+
 
 # For more information, see
 # <http://elasticsearch.org/guide/en/elasticsearch/reference/current/modules-discovery-zen.html>
@@ -318,7 +321,9 @@ path.logs: {{ elasticsearch_logdir }}
 #
 # 1. Disable multicast discovery (enabled by default):
 #
-#discovery.zen.ping.multicast.enabled: false
+discovery.zen.ping.multicast: {{ elasticsearch_discovery_zen_ping_multicast_enabled }}
+
+
 #
 # 2. Configure an initial list of master nodes in the cluster
 #    to perform discovery when new nodes (master or data) are started:

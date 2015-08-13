@@ -1,0 +1,8 @@
+---
+# Nginx settings
+nginx_logdir: /var/log/nginx
+nginx_tmp: /var/tmp/nginx
+nginx_user: nginx
+nginx_group: nginx
+nginx_version: 1.8.0
+nginx_install_dir: /opt/nginx

@@ -30,7 +30,7 @@ supervisor.rpcinterface_factory = supervisor.rpcinterface:make_main_rpcinterface
 command=/opt/elasticsearch-{{ elasticsearch_version }}/bin/elasticsearch
 directory=/opt/elasticsearch-{{ elasticsearch_version }}/
 user={{ elasticsearch_user }}
-environment=JAVA_OPTS="{{ elasticsearch_java_opts }}"
+environment=JAVA_OPTS="{{ elasticsearch_java_opts }}",ES_HEAP_SIZE="{{ elasticsearch_heap_size }}"
 autostart=true
 autorestart=true
 redirect_stderr=true
