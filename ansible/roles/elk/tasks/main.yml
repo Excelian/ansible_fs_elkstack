@@ -58,6 +58,8 @@
   with_items:
   - "{{supervisor_logdir}}"
   - "{{supervisor_runtimedir}}"
+  - "/etc/supervisor"
+  - "/etc/supervisor/conf.d"
   - "{{kibana_logdir}}"
   - "{{elasticsearch_logdir}}"
   - "{{elasticsearch_datadir}}"
