@@ -126,6 +126,11 @@
     state: running
     enabled: yes
 
+# Pause for 1 minute to let all services start or else ansible will fail
+# https://github.com/ansible/ansible/issues/3977
+- name: Pause 1 minute while we wait for services to start
+  pause: minutes=1
+
 - name: Ensure Elasticsearch is running
   supervisorctl:
     supervisorctl_path={{ ensemble_dir }}/bin/supervisorctl
