@@ -137,16 +137,16 @@
     creates: "{{ pkg_temp }}/elementtree-1.2.6-20050316/build"
 
 - name: Extract Django
-  unarchive: src={{ packages_dir }}/Django-1.8.2.tar.gz
+  unarchive: src={{ packages_dir }}/Django-1.8.6.tar.gz
             dest={{ pkg_temp }}
             copy=no
-            creates={{ pkg_temp }}/Django-1.8.2
+            creates={{ pkg_temp }}/Django-1.8.6
 
 - name: Install Django
   shell: '{{ ensemble_dir }}/bin/python setup.py install'
   args:
-    chdir: "{{ pkg_temp }}/Django-1.8.2"
-    creates: "{{ pkg_temp }}/Django-1.8.2/build"
+    chdir: "{{ pkg_temp }}/Django-1.8.6"
+    creates: "{{ pkg_temp }}/Django-1.8.6/build"
 
 - name: Extract pyodbc
   unarchive: src={{ packages_dir }}/pyodbc-3.0.7.zip
